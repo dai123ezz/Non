@@ -1,158 +1,100 @@
---[[ 
-    GEMINI V8 ULTIMATE FINAL - BLOX FRUIT EDITION
-    Hỗ trợ: Delta, Fluxus, Arceus X
-    Tính năng: 
-    - Tab PVP: Aimbot, Infi Jump, Hitbox.
-    - Tab FARM: Auto Level, Fast Attack, Chọn vũ khí, Auto Stats.
-    - Tab WORLD: Teleport Sea 1-2-3, Bay đến mọi đảo.
-    - Tab MONEY: Smooth Fly Chest (Bay nhặt rương an toàn).
-]]
-
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
 local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
 
--- // BIẾN TRẠNG THÁI // --
-local loaiVuKhi = "Melee"
-local statNang = "Melee"
-local dangFarmLevel, dangFastAttack, dangInfiJump, dangHitbox, dangFarmChest = false, false, false, false, false
-local tocDoBayChest = 200
-
--- // DATABASE TỌA ĐỘ SEA // --
-local ToaDoBien = {
-    ["Sea 1"] = {
-        ["Jungle"] = Vector3.new(-1612, 37, 149), ["Pirate Village"] = Vector3.new(-1142, 5, 3828),
-        ["Desert"] = Vector3.new(895, 7, 4393), ["Snow Island"] = Vector3.new(1385, 87, -1298),
-        ["Skypiea"] = Vector3.new(-1611, 800, -153), ["Prison"] = Vector3.new(4841, 6, 735)
-    },
-    ["Sea 2"] = {
-        ["Cafe"] = Vector3.new(-380, 77, 255), ["Mansion"] = Vector3.new(-12463, 332, -400),
-        ["Green Zone"] = Vector3.new(-2448, 73, -3210), ["Ice Castle"] = Vector3.new(6142, 294, -6777)
-    }
+_G.Settings = {
+    AutoFarm = false,
+    FastAttack = false,
+    FlyChest = false,
+    AutoMirage = false,
+    AutoRaid = false,
+    FlySpeed = 250,
+    Weapon = "Melee"
 }
 
--- // HÀM BAY MƯỢT ĐẾN RƯƠNG // --
-local function SmoothFly(targetCFrame)
-    if not LocalPlayer.Character or not LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then return end
-    local distance = (LocalPlayer.Character.HumanoidRootPart.Position - targetCFrame.Position).Magnitude
-    local duration = distance / tocDoBayChest
-    local tween = TweenService:Create(LocalPlayer.Character.HumanoidRootPart, TweenInfo.new(duration, Enum.EasingStyle.Linear), {CFrame = targetCFrame})
-    tween:Play()
-    return tween
-end
-
--- // GIAO DIỆN CHÍNH // --
 local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
-ScreenGui.Name = "GeminiV8_Final"; ScreenGui.ResetOnSpawn = false
+ScreenGui.Name = "BananaHub_Clean"
 
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 300, 0, 450); Main.Position = UDim2.new(0.5, -150, 0.5, -225)
-Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15); Instance.new("UICorner", Main)
-Instance.new("UIStroke", Main).Color = Color3.fromRGB(0, 255, 255)
+Main.Size = UDim2.new(0, 450, 0, 300)
+Main.Position = UDim2.new(0.5, -225, 0.5, -150)
+Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+Main.BorderSizePixel = 0
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
+Instance.new("UIStroke", Main).Color = Color3.fromRGB(255, 215, 0)
 
-local TabBar = Instance.new("Frame", Main)
-TabBar.Size = UDim2.new(1, 0, 0, 40); TabBar.BackgroundTransparency = 1
+local Sidebar = Instance.new("Frame", Main)
+Sidebar.Size = UDim2.new(0, 120, 1, 0)
+Sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0, 10)
+
+local Container = Instance.new("Frame", Main)
+Container.Size = UDim2.new(1, -130, 1, -10)
+Container.Position = UDim2.new(0, 125, 0, 5)
+Container.BackgroundTransparency = 1
 
 local Pages = {}
-local function CreatePage(name, x)
-    local p = Instance.new("ScrollingFrame", Main)
-    p.Size = UDim2.new(1, 0, 1, -50); p.Position = UDim2.new(0, 0, 0, 50)
-    p.BackgroundTransparency = 1; p.Visible = false; p.ScrollBarThickness = 3
-    
-    local b = Instance.new("TextButton", TabBar)
-    b.Size = UDim2.new(0.25, 0, 1, 0); b.Position = UDim2.new(x, 0, 0, 0)
-    b.Text = name; b.BackgroundColor3 = Color3.fromRGB(30, 30, 30); b.TextColor3 = Color3.new(1,1,1)
-    b.MouseButton1Click:Connect(function()
+local function CreatePage(name)
+    local p = Instance.new("ScrollingFrame", Container)
+    p.Size = UDim2.new(1, 0, 1, 0)
+    p.BackgroundTransparency = 1; p.Visible = false; p.ScrollBarThickness = 0
+    Pages[name] = p
+    return p
+end
+
+local function AddTab(name)
+    local btn = Instance.new("TextButton", Sidebar)
+    btn.Size = UDim2.new(0.9, 0, 0, 35)
+    btn.Position = UDim2.new(0.05, 0, 0, 10 + (#Sidebar:GetChildren()-1) * 40)
+    btn.Text = name; btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    btn.TextColor3 = Color3.new(1, 1, 1); Instance.new("UICorner", btn)
+    btn.MouseButton1Click:Connect(function()
         for _, pg in pairs(Pages) do pg.Visible = false end
-        p.Visible = true
+        Pages[name].Visible = true
     end)
-    Pages[name] = p; return p
+    return CreatePage(name)
 end
 
-local PageFarm = CreatePage("FARM", 0); PageFarm.Visible = true
-local PagePVP = CreatePage("PVP", 0.25)
-local PageWorld = CreatePage("WORLD", 0.5)
-local PageMoney = CreatePage("MONEY", 0.75)
+local TabMain = AddTab("Farm")
+local TabSea = AddTab("Sea")
+local TabMisc = AddTab("Misc")
+TabMain.Visible = true
 
-local function AddBtn(text, parent, callback)
-    local btn = Instance.new("TextButton", parent)
-    btn.Size = UDim2.new(0.9, 0, 0, 38); btn.Position = UDim2.new(0.05, 0, 0, (#parent:GetChildren() * 42))
-    btn.Text = text; btn.BackgroundColor3 = Color3.fromRGB(45, 45, 45); btn.TextColor3 = Color3.new(1,1,1)
-    Instance.new("UICorner", btn); btn.MouseButton1Click:Connect(function() callback(btn) end)
-    parent.CanvasSize = UDim2.new(0,0,0, #parent:GetChildren() * 45)
+local function CreateToggle(text, parent, configKey)
+    local frame = Instance.new("TextButton", parent)
+    frame.Size = UDim2.new(0.95, 0, 0, 38)
+    frame.Position = UDim2.new(0, 0, 0, (#parent:GetChildren()-1) * 42)
+    frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35); frame.TextColor3 = Color3.new(1, 1, 1)
+    frame.Text = text .. ": OFF"; Instance.new("UICorner", frame)
+    frame.MouseButton1Click:Connect(function()
+        _G.Settings[configKey] = not _G.Settings[configKey]
+        frame.Text = text .. ": " .. (_G.Settings[configKey] and "ON" or "OFF")
+        frame.TextColor3 = _G.Settings[configKey] and Color3.fromRGB(255, 215, 0) or Color3.new(1, 1, 1)
+    end)
 end
 
--- // TAB FARM // --
-AddBtn("AUTO FARM LEVEL: OFF", PageFarm, function(b) 
-    dangFarmLevel = not dangFarmLevel; b.Text = "AUTO FARM: "..(dangFarmLevel and "ON" or "OFF")
-end)
-AddBtn("WEAPON: Melee", PageFarm, function(b)
-    loaiVuKhi = (loaiVuKhi == "Melee") and "Sword" or "Melee"; b.Text = "WEAPON: "..loaiVuKhi
-end)
-AddBtn("FAST ATTACK: OFF", PageFarm, function(b)
-    dangFastAttack = not dangFastAttack; b.Text = "FAST ATTACK: "..(dangFastAttack and "ON" or "OFF")
-end)
+CreateToggle("Auto Farm", TabMain, "AutoFarm")
+CreateToggle("Fast Attack", TabMain, "FastAttack")
+CreateToggle("Fly Chest", TabMisc, "FlyChest")
+CreateToggle("Mirage Finder", TabSea, "AutoMirage")
 
--- // TAB MONEY (CHEST FLY) // --
-AddBtn("FLY TO CHEST: OFF", PageMoney, function(b)
-    dangFarmChest = not dangFarmChest; b.Text = "FLY CHEST: "..(dangFarmChest and "ON" or "OFF")
-end)
-
--- // TAB WORLD (ISLANDS) // --
-for sea, islands in pairs(ToaDoBien) do
-    for name, pos in pairs(islands) do
-        AddBtn(sea..": "..name, PageWorld, function()
-            LocalPlayer.Character.HumanoidRootPart.CFrame = CFrame.new(pos + Vector3.new(0, 50, 0))
-        end)
-    end
-end
-
--- // TAB PVP // --
-AddBtn("BIG HITBOX: OFF", PagePVP, function(b)
-    dangHitbox = not dangHitbox; b.Text = "HITBOX: "..(dangHitbox and "ON" or "OFF")
-end)
-AddBtn("INFI JUMP: OFF", PagePVP, function(b)
-    dangInfiJump = not dangInfiJump; b.Text = "INFI JUMP: "..(dangInfiJump and "ON" or "OFF")
-end)
-
--- // VÒNG LẶP LOGIC // --
 task.spawn(function()
     while task.wait() do
-        if dangFarmChest then
-            local chests = {}
-            for _, v in pairs(workspace:GetDescendants()) do
-                if string.find(v.Name, "Chest") and v:IsA("BasePart") then table.insert(chests, v) end
-            end
-            for _, chest in pairs(chests) do
-                if not dangFarmChest then break end
-                if chest.Parent then
-                    LocalPlayer.Character.Humanoid:ChangeState(11)
-                    local fly = SmoothFly(chest.CFrame)
-                    if fly then fly.Completed:Wait(); task.wait(0.2) end
-                end
-            end
-        end
-        if dangFastAttack or dangFarmLevel then
+        if _G.Settings.AutoFarm or _G.Settings.FastAttack then
             pcall(function()
                 local tool = LocalPlayer.Character:FindFirstChildOfClass("Tool")
-                if tool then game:GetService("VirtualUser"):Button1Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame) end
+                if tool then
+                    game:GetService("VirtualUser"):CaptureController()
+                    game:GetService("VirtualUser"):Button1Down(Vector2.new(0,0), workspace.CurrentCamera.CFrame)
+                end
             end)
         end
     end
 end)
 
--- Nút mở menu mượt
-local NutMo = Instance.new("TextButton", ScreenGui)
-NutMo.Size = UDim2.new(0, 50, 0, 50); NutMo.Position = UDim2.new(0, 10, 0.5, -25); NutMo.Text = "💎"
-NutMo.BackgroundColor3 = Color3.fromRGB(20, 20, 20); Instance.new("UICorner", NutMo).CornerRadius = UDim.new(1,0)
-NutMo.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
-
--- Kéo thả (Delta Support)
-local d, ds, sp
-Main.InputBegan:Connect(function(i) if i.UserInputType == Enum.UserInputType.Touch then d = true; ds = i.Position; sp = Main.Position end end)
-Main.InputChanged:Connect(function(i) if d and i.UserInputType == Enum.UserInputType.Touch then 
-    local delta = i.Position - ds; Main.Position = UDim2.new(sp.X.Scale, sp.X.Offset + delta.X, sp.Y.Scale, sp.Y.Offset + delta.Y) 
-end end)
-UserInputService.InputEnded:Connect(function(i) if i.UserInputType == Enum.UserInputType.Touch then d = false end end)
+local OpenBtn = Instance.new("TextButton", ScreenGui)
+OpenBtn.Size = UDim2.new(0, 50, 0, 50); OpenBtn.Position = UDim2.new(0, 10, 0.4, 0)
+OpenBtn.Text = "🍌"; OpenBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(1, 0)
+OpenBtn.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
