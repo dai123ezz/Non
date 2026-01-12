@@ -6,49 +6,58 @@ local UserInputService = game:GetService("UserInputService")
 _G.Settings = {
     AutoFarm = false,
     FastAttack = false,
+    AutoStats = false,
     FlyChest = false,
-    AutoMirage = false,
     AutoRaid = false,
-    FlySpeed = 250,
-    Weapon = "Melee"
+    AutoMirage = false,
+    EspFruit = false,
+    EspPlayer = false,
+    InfiJump = false,
+    AutoBuyAbility = false,
+    AutoBuyWeapon = false,
+    Weapon = "Melee",
+    StatTarget = "Melee",
+    FlySpeed = 250
 }
 
 local ScreenGui = Instance.new("ScreenGui", LocalPlayer.PlayerGui)
-ScreenGui.Name = "BananaHub_Clean"
+ScreenGui.Name = "BananaHub_Premium_Final"
+ScreenGui.ResetOnSpawn = false
 
 local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 450, 0, 300)
-Main.Position = UDim2.new(0.5, -225, 0.5, -150)
+Main.Size = UDim2.new(0, 520, 0, 360)
+Main.Position = UDim2.new(0.5, -260, 0.5, -180)
 Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 Main.BorderSizePixel = 0
-Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 12)
 Instance.new("UIStroke", Main).Color = Color3.fromRGB(255, 215, 0)
 
 local Sidebar = Instance.new("Frame", Main)
-Sidebar.Size = UDim2.new(0, 120, 1, 0)
+Sidebar.Size = UDim2.new(0, 140, 1, 0)
 Sidebar.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0, 10)
+Instance.new("UICorner", Sidebar).CornerRadius = UDim.new(0, 12)
 
 local Container = Instance.new("Frame", Main)
-Container.Size = UDim2.new(1, -130, 1, -10)
-Container.Position = UDim2.new(0, 125, 0, 5)
+Container.Size = UDim2.new(1, -155, 1, -20)
+Container.Position = UDim2.new(0, 150, 0, 10)
 Container.BackgroundTransparency = 1
 
 local Pages = {}
 local function CreatePage(name)
     local p = Instance.new("ScrollingFrame", Container)
     p.Size = UDim2.new(1, 0, 1, 0)
-    p.BackgroundTransparency = 1; p.Visible = false; p.ScrollBarThickness = 0
+    p.BackgroundTransparency = 1; p.Visible = false; p.ScrollBarThickness = 2
     Pages[name] = p
     return p
 end
 
 local function AddTab(name)
     local btn = Instance.new("TextButton", Sidebar)
-    btn.Size = UDim2.new(0.9, 0, 0, 35)
-    btn.Position = UDim2.new(0.05, 0, 0, 10 + (#Sidebar:GetChildren()-1) * 40)
-    btn.Text = name; btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    btn.TextColor3 = Color3.new(1, 1, 1); Instance.new("UICorner", btn)
+    btn.Size = UDim2.new(0.9, 0, 0, 38)
+    btn.Position = UDim2.new(0.05, 0, 0, 15 + (#Sidebar:GetChildren()-1) * 42)
+    btn.Text = name; btn.Font = Enum.Font.GothamBold; btn.TextSize = 13
+    btn.BackgroundColor3 = Color3.fromRGB(30, 30, 30); btn.TextColor3 = Color3.new(1, 1, 1)
+    Instance.new("UICorner", btn)
     btn.MouseButton1Click:Connect(function()
         for _, pg in pairs(Pages) do pg.Visible = false end
         Pages[name].Visible = true
@@ -56,28 +65,42 @@ local function AddTab(name)
     return CreatePage(name)
 end
 
-local TabMain = AddTab("Farm")
-local TabSea = AddTab("Sea")
-local TabMisc = AddTab("Misc")
+local TabMain = AddTab("MAIN FARM")
+local TabSea = AddTab("SEA & RAID")
+local TabEsp = AddTab("VISUAL/ESP")
+local TabBuy = AddTab("AUTO BUY")
+local TabMisc = AddTab("MISC/MONEY")
 TabMain.Visible = true
 
 local function CreateToggle(text, parent, configKey)
     local frame = Instance.new("TextButton", parent)
-    frame.Size = UDim2.new(0.95, 0, 0, 38)
-    frame.Position = UDim2.new(0, 0, 0, (#parent:GetChildren()-1) * 42)
+    frame.Size = UDim2.new(0.95, 0, 0, 40)
+    frame.Position = UDim2.new(0, 0, 0, (#parent:GetChildren()-1) * 45)
     frame.BackgroundColor3 = Color3.fromRGB(35, 35, 35); frame.TextColor3 = Color3.new(1, 1, 1)
-    frame.Text = text .. ": OFF"; Instance.new("UICorner", frame)
+    frame.Text = text .. ": OFF"; frame.Font = Enum.Font.Gotham; Instance.new("UICorner", frame)
     frame.MouseButton1Click:Connect(function()
         _G.Settings[configKey] = not _G.Settings[configKey]
         frame.Text = text .. ": " .. (_G.Settings[configKey] and "ON" or "OFF")
         frame.TextColor3 = _G.Settings[configKey] and Color3.fromRGB(255, 215, 0) or Color3.new(1, 1, 1)
     end)
+    parent.CanvasSize = UDim2.new(0, 0, 0, #parent:GetChildren() * 45)
 end
 
-CreateToggle("Auto Farm", TabMain, "AutoFarm")
+CreateToggle("Auto Farm Level", TabMain, "AutoFarm")
 CreateToggle("Fast Attack", TabMain, "FastAttack")
-CreateToggle("Fly Chest", TabMisc, "FlyChest")
-CreateToggle("Mirage Finder", TabSea, "AutoMirage")
+CreateToggle("Auto Stats", TabMain, "AutoStats")
+
+CreateToggle("Auto Mirage Island", TabSea, "AutoMirage")
+CreateToggle("Auto Raid", TabSea, "AutoRaid")
+
+CreateToggle("Fruit ESP", TabEsp, "EspFruit")
+CreateToggle("Player ESP", TabEsp, "EspPlayer")
+
+CreateToggle("Buy Abilities (Haki/Dash)", TabBuy, "AutoBuyAbility")
+CreateToggle("Buy Weapons", TabBuy, "AutoBuyWeapon")
+
+CreateToggle("Smooth Fly Chest", TabMisc, "FlyChest")
+CreateToggle("Infinite Jump", TabMisc, "InfiJump")
 
 task.spawn(function()
     while task.wait() do
@@ -90,11 +113,24 @@ task.spawn(function()
                 end
             end)
         end
+        if _G.Settings.AutoStats then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("AddClickStat", _G.Settings.StatTarget, 1)
+        end
+        if _G.Settings.AutoBuyAbility then
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyAbility", "BusoHaki")
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyAbility", "AirJump")
+            game:GetService("ReplicatedStorage").Remotes.CommF_:InvokeServer("BuyAbility", "Soru")
+        end
     end
 end)
 
+UserInputService.JumpRequest:Connect(function()
+    if _G.Settings.InfiJump then LocalPlayer.Character.Humanoid:ChangeState("Jumping") end
+end)
+
 local OpenBtn = Instance.new("TextButton", ScreenGui)
-OpenBtn.Size = UDim2.new(0, 50, 0, 50); OpenBtn.Position = UDim2.new(0, 10, 0.4, 0)
-OpenBtn.Text = "🍌"; OpenBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+OpenBtn.Size = UDim2.new(0, 60, 0, 60); OpenBtn.Position = UDim2.new(0, 10, 0.4, 0)
+OpenBtn.Text = "🍌"; OpenBtn.TextSize = 35; OpenBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
 Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(1, 0)
+Instance.new("UIStroke", OpenBtn).Color = Color3.fromRGB(255, 215, 0)
 OpenBtn.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
